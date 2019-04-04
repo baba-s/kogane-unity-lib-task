@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -10,25 +11,20 @@ namespace KoganeUnityLib.Example
 		{
 			if ( Input.GetKeyDown( KeyCode.Space ) )
 			{
-				var task = new SingleTaskWithProfile
+				var task = new SingleTaskWithProfiler
 				{
-					{ "Call 1", onEnded => Call( 3000, onEnded ) },
-					{ "Call 2", onEnded => Call( 1000, onEnded ) },
-					{ "Call 3", onEnded => Call( 0, onEnded ) },
-					{ "Call 4", onEnded => Call( 2000, onEnded ) },
+					{ "Call 1", onEnded => StartCoroutine( Call( 0.3f, onEnded ) ) },
+					{ "Call 2", onEnded => StartCoroutine( Call( 0.1f, onEnded ) ) },
+					{ "Call 3", onEnded => StartCoroutine( Call( 0.0f, onEnded ) ) },
+					{ "Call 4", onEnded => StartCoroutine( Call( 0.2f, onEnded ) ) },
 				};
 				task.Play( "ピカチュウ" );
 			}
 		}
 
-		private async void Call( int delay, Action callback )
+		private IEnumerator Call( float delay, Action callback )
 		{
-			await Task.Delay( delay );
-			var count = UnityEngine.Random.Range( 0, 1000000 );
-			for ( int i = 0; i < count; i++ )
-			{
-				var str = $"{i}";
-			}
+			yield return new WaitForSeconds( delay );
 			callback?.Invoke();
 		}
 	}

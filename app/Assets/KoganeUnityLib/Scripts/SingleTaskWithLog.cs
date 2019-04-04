@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KoganeUnityLib.Internal;
+using System;
 using System.Collections;
 using System.Diagnostics;
 
@@ -50,10 +51,10 @@ namespace KoganeUnityLib
 		{
 			m_name = text;
 
-			Log( $"【SingleTask】「{text}」開始" );
+			Log( $"【SingleTask】「{m_name}」開始" );
 			m_task.Play( () =>
 			{
-				Log( $"【SingleTask】「{text}」終了" );
+				Log( $"【SingleTask】「{m_name}」終了" );
 				onCompleted?.Invoke();
 			} );
 		}
@@ -61,7 +62,7 @@ namespace KoganeUnityLib
 		/// <summary>
 		/// ログ出力します
 		/// </summary>
-		[Conditional( "ENABLE_DEBUG_LOG" )]
+		[Conditional( TaskConst.LOG_SYMBOL )]
 		private static void Log( string message )
 		{
 			if ( !IsLogEnabled ) return;

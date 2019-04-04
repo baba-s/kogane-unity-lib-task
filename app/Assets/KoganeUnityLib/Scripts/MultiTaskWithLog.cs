@@ -6,9 +6,9 @@ using System.Diagnostics;
 namespace KoganeUnityLib
 {
 	/// <summary>
-	/// 処理時間や GC の発生回数の出力機能付きの MultiTask を管理するクラス
+	/// ログ出力機能付きの MultiTask を管理するクラス
 	/// </summary>
-	public sealed class MultiTaskWithProfile : IEnumerable
+	public sealed class MultiTaskWithLog : IEnumerable
 	{
 		//==============================================================================
 		// 変数(readonly)
@@ -36,13 +36,9 @@ namespace KoganeUnityLib
 			m_task.Add( onEnded =>
 			{
 				Log( $"【MultiTask】「{m_name}」「{text}」開始" );
-				var sw = new Stopwatch();
-				sw.Start();
 				task( () =>
 				{
-					sw.Stop();
-					var elapsedTime = ToElapsedTime( sw );
-					Log( $"【MultiTask】「{m_name}」「{text}」終了    {elapsedTime}" );
+					Log( $"【MultiTask】「{m_name}」「{text}」終了" );
 					onEnded();
 				} );
 			} );
@@ -55,26 +51,12 @@ namespace KoganeUnityLib
 		{
 			m_name = text;
 
-			Log( $"【MultiTask】「{text}」開始" );
-			var sw = new Stopwatch();
-			sw.Start();
+			Log( $"【MultiTask】「{m_name}」開始" );
 			m_task.Play( () =>
 			{
-				sw.Stop();
-				var elapsedTime = ToElapsedTime( sw );
-				Log( $"【MultiTask】「{text}」終了    {elapsedTime}" );
+				Log( $"【MultiTask】「{m_name}」終了" );
 				onCompleted?.Invoke();
 			} );
-		}
-
-		/// <summary>
-		/// 経過時間のテキストに変換して返します
-		/// </summary>
-		private static string ToElapsedTime( Stopwatch sw )
-		{
-			var ts = sw.Elapsed;
-			var elapsedTime = $"{ts.Seconds.ToString()}.{ts.Milliseconds.ToString()} 秒";
-			return elapsedTime;
 		}
 
 		/// <summary>

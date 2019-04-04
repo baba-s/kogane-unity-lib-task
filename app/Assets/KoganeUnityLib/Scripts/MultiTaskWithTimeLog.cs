@@ -2,18 +2,19 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using UnityEngine;
 
 namespace KoganeUnityLib
 {
 	/// <summary>
-	/// 処理時間や GC の発生回数の出力機能付きの SingleTask を管理するクラス
+	/// 処理時間のログ出力機能付きの MultiTask を管理するクラス
 	/// </summary>
-	public sealed class SingleTaskWithProfile : IEnumerable
+	public sealed class MultiTaskWithTimeLog : IEnumerable
 	{
 		//==============================================================================
 		// 変数(readonly)
 		//==============================================================================
-		private readonly SingleTask m_task = new SingleTask();
+		private readonly MultiTask m_task = new MultiTask();
 
 		//==============================================================================
 		// 変数
@@ -35,17 +36,12 @@ namespace KoganeUnityLib
 		{
 			m_task.Add( onEnded =>
 			{
-				Log( $"【SingleTask】「{m_name}」「{text}」開始" );
-				var sw = new Stopwatch();
-				sw.Start();
-				var gcw = new GCWatcher();
-				gcw.Start();
+				Log( $"【MultiTask】「{m_name}」「{text}」開始" );
+				var startTime = Time.realtimeSinceStartup;
 				task( () =>
 				{
-					gcw.Stop();
-					sw.Stop();
-					var elapsedTime = ToElapsedTime( sw );
-					Log( $"【SingleTask】「{m_name}」「{text}」終了 / {elapsedTime} / GC {gcw.Count.ToString()} 回" );
+				var elapsedTime = Time.realtimeSinceStartup - startTime;
+					Log( $"【MultiTask】「{m_name}」「{text}」終了    {elapsedTime.ToString( "0.###" ) } 秒" );
 					onEnded();
 				} );
 			} );
@@ -58,35 +54,20 @@ namespace KoganeUnityLib
 		{
 			m_name = text;
 
-			Log( $"【SingleTask】「{text}」開始" );
-			var sw = new Stopwatch();
-			sw.Start();
-			var gcw = new GCWatcher();
-			gcw.Start();
+			Log( $"【MultiTask】「{m_name}」開始" );
+			var startTime = Time.realtimeSinceStartup;
 			m_task.Play( () =>
 			{
-				gcw.Stop();
-				sw.Stop();
-				var elapsedTime = ToElapsedTime( sw );
-				Log( $"【SingleTask】「{text}」終了 / {elapsedTime} / GC {gcw.Count.ToString()} 回" );
+				var elapsedTime = Time.realtimeSinceStartup - startTime;
+				Log( $"【MultiTask】「{m_name}」終了    {elapsedTime.ToString( "0.###" ) } 秒" );
 				onCompleted?.Invoke();
 			} );
 		}
 
 		/// <summary>
-		/// 経過時間のテキストに変換して返します
-		/// </summary>
-		private static string ToElapsedTime( Stopwatch sw )
-		{
-			var ts = sw.Elapsed;
-			var elapsedTime = $"{ts.Seconds.ToString()}.{ts.Milliseconds.ToString()} 秒";
-			return elapsedTime;
-		}
-
-		/// <summary>
 		/// ログ出力します
 		/// </summary>
-		[Conditional( "ENABLE_DEBUG_LOG" )]
+		[Conditional( TaskConst.LOG_SYMBOL )]
 		private static void Log( string message )
 		{
 			if ( !IsLogEnabled ) return;
