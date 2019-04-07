@@ -111,3 +111,7 @@ var task = new MultiTaskWithProfiler
 };
 task.Play( "Task", () => Debug.Log( "Complete" ) );
 ```
+
+## ログ出力を有効化
+
+ログ出力を有効化したい場合は `ENABLE_DEBUG_LOG` のシンボルを追加する必要があります
