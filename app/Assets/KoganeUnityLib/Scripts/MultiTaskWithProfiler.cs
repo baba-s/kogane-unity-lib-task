@@ -7,7 +7,7 @@ using UnityEngine;
 namespace KoganeUnityLib
 {
 	/// <summary>
-	/// Profiler 出力機能付きの MultiTask を管理するクラス
+	/// 処理時間や GC 発生回数のログ出力機能付きの MultiTask を管理するクラス
 	/// </summary>
 	public sealed class MultiTaskWithProfiler : IEnumerable
 	{
@@ -34,6 +34,8 @@ namespace KoganeUnityLib
 		/// </summary>
 		public void Add( string text, Action<Action> task )
 		{
+#if ENABLE_DEBUG_LOG
+
 			m_task.Add( onEnded =>
 			{
 				Log( $"【MultiTask】「{m_name}」「{text}」開始" );
@@ -43,11 +45,13 @@ namespace KoganeUnityLib
 				task( () =>
 				{
 					gcWatcher.Stop();
-					var elapsedTime = Time.realtimeSinceStartup - startTime;
-					Log( $"【MultiTask】「{m_name}」「{text}」終了    {elapsedTime.ToString( "0.###" ) } 秒    GC {gcWatcher.Count.ToString()} 回" );
+					Log( $"【MultiTask】「{m_name}」「{text}」終了    {( Time.realtimeSinceStartup - startTime ).ToString( "0.###" ) } 秒    GC {gcWatcher.Count.ToString()} 回" );
 					onEnded();
 				} );
 			} );
+#else
+			m_task.Add( text, task );
+#endif
 		}
 
 		/// <summary>
@@ -55,6 +59,8 @@ namespace KoganeUnityLib
 		/// </summary>
 		public void Play( string text, Action onCompleted = null )
 		{
+#if ENABLE_DEBUG_LOG
+
 			m_name = text;
 
 			Log( $"【MultiTask】「{m_name}」開始" );
@@ -64,16 +70,18 @@ namespace KoganeUnityLib
 			m_task.Play( () =>
 			{
 				gcWatcher.Stop();
-				var elapsedTime = Time.realtimeSinceStartup - startTime;
-				Log( $"【MultiTask】「{m_name}」終了    {elapsedTime.ToString( "0.###" ) } 秒    GC {gcWatcher.Count.ToString()} 回" );
+				Log( $"【MultiTask】「{m_name}」終了    {( Time.realtimeSinceStartup - startTime ).ToString( "0.###" ) } 秒    GC {gcWatcher.Count.ToString()} 回" );
 				onCompleted?.Invoke();
 			} );
+#else
+			m_task.Play( text, onCompleted );
+#endif
 		}
 
 		/// <summary>
 		/// ログ出力します
 		/// </summary>
-		[Conditional( TaskConst.LOG_SYMBOL )]
+		[Conditional( "ENABLE_DEBUG_LOG" )]
 		private static void Log( string message )
 		{
 			if ( !IsLogEnabled ) return;

@@ -33,6 +33,8 @@ namespace KoganeUnityLib
 		/// </summary>
 		public void Add( string text, Action<Action> task )
 		{
+#if ENABLE_DEBUG_LOG
+
 			m_task.Add( onEnded =>
 			{
 				Log( $"【SingleTask】「{m_name}」「{text}」開始" );
@@ -42,6 +44,9 @@ namespace KoganeUnityLib
 					onEnded();
 				} );
 			} );
+#else
+			m_task.Add( text, task );
+#endif
 		}
 
 		/// <summary>
@@ -49,6 +54,8 @@ namespace KoganeUnityLib
 		/// </summary>
 		public void Play( string text, Action onCompleted = null )
 		{
+#if ENABLE_DEBUG_LOG
+
 			m_name = text;
 
 			Log( $"【SingleTask】「{m_name}」開始" );
@@ -57,12 +64,15 @@ namespace KoganeUnityLib
 				Log( $"【SingleTask】「{m_name}」終了" );
 				onCompleted?.Invoke();
 			} );
+#else
+			m_task.Play( text, onCompleted );
+#endif
 		}
 
 		/// <summary>
 		/// ログ出力します
 		/// </summary>
-		[Conditional( TaskConst.LOG_SYMBOL )]
+		[Conditional( "ENABLE_DEBUG_LOG" )]
 		private static void Log( string message )
 		{
 			if ( !IsLogEnabled ) return;
