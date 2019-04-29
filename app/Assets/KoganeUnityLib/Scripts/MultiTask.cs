@@ -33,6 +33,14 @@ namespace KoganeUnityLib
 		}
 
 		/// <summary>
+		/// タスクを追加します
+		/// </summary>
+		public void Add( string text, Action<Action> task )
+		{
+			Add( task );
+		}
+
+		/// <summary>
 		/// タスクを実行します
 		/// </summary>
 		public void Play( Action onCompleted = null )
@@ -68,6 +76,14 @@ namespace KoganeUnityLib
 					nextTask = null;
 				} );
 			}
+		}
+
+		/// <summary>
+		/// タスクを実行します
+		/// </summary>
+		public void Play( string text, Action onCompleted = null )
+		{
+			Play( onCompleted );
 		}
 
 		/// <summary>
